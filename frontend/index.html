@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - Sistema Completo</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth-styles.css">
 </head>
@@ -88,7 +89,7 @@
             <nav class="navbar navbar-dark navbar-admin">
                 <div class="navbar-wrapper">
                     <div class="navbar-brand">
-                        <span class="brand-icon">🛒</span>
+                        <span class="material-icons brand-icon">shopping_cart</span>
                         <span class="brand-name">Admin Panel</span>
                     </div>
                     
@@ -103,26 +104,45 @@
                     <div class="nav-menu" id="admin-menu">
                         <div class="nav-links">
                             <button onclick="switchAdminTab('overview')" class="nav-link active">
-                                <span class="nav-icon">📊</span>
+                                <span class="material-icons nav-icon">dashboard</span>
                                 <span class="nav-text">Overview</span>
                             </button>
                             <button onclick="switchAdminTab('users')" class="nav-link">
-                                <span class="nav-icon">👥</span>
+                                <span class="material-icons nav-icon">people</span>
                                 <span class="nav-text">Usuarios</span>
                             </button>
                             <button onclick="switchAdminTab('products')" class="nav-link">
-                                <span class="nav-icon">📦</span>
+                                <span class="material-icons nav-icon">inventory_2</span>
                                 <span class="nav-text">Productos</span>
                             </button>
                             <button onclick="switchAdminTab('orders')" class="nav-link">
-                                <span class="nav-icon">📋</span>
+                                <span class="material-icons nav-icon">receipt</span>
                                 <span class="nav-text">Pedidos</span>
                             </button>
                         </div>
-                        <button onclick="logout()" class="nav-logout">
-                            <span class="nav-icon">👤</span>
-                            <span class="nav-text">Salir</span>
-                        </button>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-toggle" onclick="toggleUserDropdown('admin')">
+                                <span class="material-icons">account_circle</span>
+                                <span class="user-name" id="admin-username">Usuario</span>
+                                <span class="material-icons dropdown-arrow">expand_more</span>
+                            </button>
+                            <div class="dropdown-menu" id="admin-dropdown-menu">
+                                <div class="dropdown-header" id="admin-user-info">
+                                    <span class="material-icons user-avatar">person</span>
+                                    <div>
+                                        <div class="dropdown-name" id="admin-dropdown-name">Usuario</div>
+                                        <div class="dropdown-email" id="admin-dropdown-email">usuario@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <button onclick="logout(); closeAllDropdowns();" class="dropdown-item logout">
+                                    <span class="material-icons">logout</span>
+                                    <span>Cerrar sesión</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </nav>
@@ -210,32 +230,60 @@
 
         <!-- VENDOR DASHBOARD -->
         <div id="vendor-section" class="dashboard" style="display: none;">
-            <nav class="navbar navbar-vendor">
-                <div class="navbar-container">
+            <nav class="navbar navbar-dark navbar-vendor">
+                <div class="navbar-wrapper">
                     <div class="navbar-brand">
-                        <span class="brand-logo">🏪</span>
-                        <span class="brand-text">MARKETPLACE</span>
+                        <span class="material-icons brand-icon">storefront</span>
+                        <span class="brand-name">Marketplace</span>
                     </div>
                     
-                    <div class="navbar-center">
-                        <button onclick="switchVendorTab('my-products')" class="nav-btn active">
-                            <span class="nav-icon">📦</span>
-                            <span class="nav-label">Mis Productos</span>
-                        </button>
-                        <button onclick="switchVendorTab('add-product')" class="nav-btn">
-                            <span class="nav-icon">➕</span>
-                            <span class="nav-label">Agregar</span>
-                        </button>
-                        <button onclick="switchVendorTab('shop')" class="nav-btn">
-                            <span class="nav-icon">🏪</span>
-                            <span class="nav-label">Tienda</span>
-                        </button>
-                    </div>
-                    
-                    <button onclick="logout()" class="nav-btn nav-logout">
-                        <span class="nav-icon">👤</span>
-                        <span class="nav-label">Salir</span>
+                    <!-- Hamburger Menu -->
+                    <button class="hamburger" onclick="toggleVendorMenu()">
+                        <svg class="hamburger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
                     </button>
+                    
+                    <!-- Navigation Menu -->
+                    <div class="nav-menu" id="vendor-menu">
+                        <div class="nav-links">
+                            <button onclick="switchVendorTab('my-products')" class="nav-link active">
+                                <span class="material-icons nav-icon">inventory_2</span>
+                                <span class="nav-text">Mis Productos</span>
+                            </button>
+                            <button onclick="switchVendorTab('add-product')" class="nav-link">
+                                <span class="material-icons nav-icon">add_circle</span>
+                                <span class="nav-text">Agregar</span>
+                            </button>
+                            <button onclick="switchVendorTab('shop')" class="nav-link">
+                                <span class="material-icons nav-icon">store</span>
+                                <span class="nav-text">Tienda</span>
+                            </button>
+                        </div>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-toggle" onclick="toggleUserDropdown('vendor')">
+                                <span class="material-icons">account_circle</span>
+                                <span class="user-name" id="vendor-username">Usuario</span>
+                                <span class="material-icons dropdown-arrow">expand_more</span>
+                            </button>
+                            <div class="dropdown-menu" id="vendor-dropdown-menu">
+                                <div class="dropdown-header" id="vendor-user-info">
+                                    <span class="material-icons user-avatar">person</span>
+                                    <div>
+                                        <div class="dropdown-name" id="vendor-dropdown-name">Usuario</div>
+                                        <div class="dropdown-email" id="vendor-dropdown-email">usuario@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <button onclick="logout(); closeAllDropdowns();" class="dropdown-item logout">
+                                    <span class="material-icons">logout</span>
+                                    <span>Cerrar sesión</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
@@ -292,32 +340,60 @@
 
         <!-- CLIENT DASHBOARD -->
         <div id="client-section" class="dashboard" style="display: none;">
-            <nav class="navbar navbar-client">
-                <div class="navbar-container">
+            <nav class="navbar navbar-dark navbar-client">
+                <div class="navbar-wrapper">
                     <div class="navbar-brand">
-                        <span class="brand-logo">🛍️</span>
-                        <span class="brand-text">TIENDA</span>
+                        <span class="material-icons brand-icon">shopping_bag</span>
+                        <span class="brand-name">Tienda Online</span>
                     </div>
                     
-                    <div class="navbar-center">
-                        <button onclick="switchClientTab('shop')" class="nav-btn active">
-                            <span class="nav-icon">🏪</span>
-                            <span class="nav-label">Tienda</span>
-                        </button>
-                        <button onclick="switchClientTab('cart')" class="nav-btn">
-                            <span class="nav-icon">🛒</span>
-                            <span class="nav-label">Mi Carrito</span>
-                        </button>
-                        <button onclick="switchClientTab('orders')" class="nav-btn">
-                            <span class="nav-icon">📦</span>
-                            <span class="nav-label">Mis Pedidos</span>
-                        </button>
-                    </div>
-                    
-                    <button onclick="logout()" class="nav-btn nav-logout">
-                        <span class="nav-icon">👤</span>
-                        <span class="nav-label">Salir</span>
+                    <!-- Hamburger Menu -->
+                    <button class="hamburger" onclick="toggleClientMenu()">
+                        <svg class="hamburger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
                     </button>
+                    
+                    <!-- Navigation Menu -->
+                    <div class="nav-menu" id="client-menu">
+                        <div class="nav-links">
+                            <button onclick="switchClientTab('shop')" class="nav-link active">
+                                <span class="material-icons nav-icon">store</span>
+                                <span class="nav-text">Tienda</span>
+                            </button>
+                            <button onclick="switchClientTab('cart')" class="nav-link">
+                                <span class="material-icons nav-icon">shopping_cart</span>
+                                <span class="nav-text">Mi Carrito</span>
+                            </button>
+                            <button onclick="switchClientTab('orders')" class="nav-link">
+                                <span class="material-icons nav-icon">receipt_long</span>
+                                <span class="nav-text">Mis Pedidos</span>
+                            </button>
+                        </div>
+                        
+                        <!-- User Profile Dropdown -->
+                        <div class="user-dropdown">
+                            <button class="user-dropdown-toggle" onclick="toggleUserDropdown('client')">
+                                <span class="material-icons">account_circle</span>
+                                <span class="user-name" id="client-username">Usuario</span>
+                                <span class="material-icons dropdown-arrow">expand_more</span>
+                            </button>
+                            <div class="dropdown-menu" id="client-dropdown-menu">
+                                <div class="dropdown-header" id="client-user-info">
+                                    <span class="material-icons user-avatar">person</span>
+                                    <div>
+                                        <div class="dropdown-name" id="client-dropdown-name">Usuario</div>
+                                        <div class="dropdown-email" id="client-dropdown-email">usuario@email.com</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <button onclick="logout(); closeAllDropdowns();" class="dropdown-item logout">
+                                    <span class="material-icons">logout</span>
+                                    <span>Cerrar sesión</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </nav>
 

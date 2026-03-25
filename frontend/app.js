@@ -183,6 +183,35 @@ function showDashboard(role) {
   document.getElementById('vendor-section').style.display = role === 'marketplace' ? 'block' : 'none';
   document.getElementById('client-section').style.display = 'none';
   
+  // Populate user dropdown with current user information
+  if (currentUser) {
+    if (role === 'admin') {
+      const adminUsername = document.getElementById('admin-username');
+      const adminDropdownName = document.getElementById('admin-dropdown-name');
+      const adminDropdownEmail = document.getElementById('admin-dropdown-email');
+      
+      if (adminUsername) adminUsername.textContent = currentUser.name;
+      if (adminDropdownName) adminDropdownName.textContent = currentUser.name;
+      if (adminDropdownEmail) adminDropdownEmail.textContent = currentUser.email || 'admin@email.com';
+    } else if (role === 'marketplace') {
+      const vendorUsername = document.getElementById('vendor-username');
+      const vendorDropdownName = document.getElementById('vendor-dropdown-name');
+      const vendorDropdownEmail = document.getElementById('vendor-dropdown-email');
+      
+      if (vendorUsername) vendorUsername.textContent = currentUser.name;
+      if (vendorDropdownName) vendorDropdownName.textContent = currentUser.name;
+      if (vendorDropdownEmail) vendorDropdownEmail.textContent = currentUser.email || 'vendor@email.com';
+    } else if (role === 'customer') {
+      const clientUsername = document.getElementById('client-username');
+      const clientDropdownName = document.getElementById('client-dropdown-name');
+      const clientDropdownEmail = document.getElementById('client-dropdown-email');
+      
+      if (clientUsername) clientUsername.textContent = currentUser.name;
+      if (clientDropdownName) clientDropdownName.textContent = currentUser.name;
+      if (clientDropdownEmail) clientDropdownEmail.textContent = currentUser.email || 'customer@email.com';
+    }
+  }
+  
   if (role === 'admin') {
     loadAdminData();
   } else if (role === 'marketplace') {
@@ -440,6 +469,37 @@ function closeClientMenu() {
   const menu = document.getElementById('client-menu');
   menu.classList.remove('active');
 }
+
+// ======================== USER DROPDOWN ========================
+function toggleUserDropdown(role) {
+  const button = document.querySelector(`#${role}-section .user-dropdown-toggle`);
+  const menu = document.getElementById(`${role}-dropdown-menu`);
+  
+  if (button && menu) {
+    // Close other dropdowns
+    closeAllDropdowns();
+    // Toggle this dropdown
+    button.classList.toggle('active');
+    menu.classList.toggle('active');
+  }
+}
+
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown-menu.active').forEach(menu => {
+    menu.classList.remove('active');
+  });
+  document.querySelectorAll('.user-dropdown-toggle.active').forEach(btn => {
+    btn.classList.remove('active');
+  });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+  const dropdown = e.target.closest('.user-dropdown');
+  if (!dropdown) {
+    closeAllDropdowns();
+  }
+});
 
 // ======================== ADMIN DASHBOARD ========================
 function switchAdminTab(tab) {
