@@ -33,11 +33,25 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { email, name, status } = req.body;
-    const user = await User.update(req.params.id, email, name, status);
-    res.status(200).json(user);
+    const { email, name, status, role } = req.body;
+    const user = await User.update(req.params.id, email, name, status, role);
+    res.status(200).json({ message: 'Usuario actualizado', user });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Cambiar rol de un usuario
+exports.updateRole = async (req, res) => {
+  try {
+    const { role } = req.body;
+    if (!role) {
+      return res.status(400).json({ error: 'El rol es requerido' });
+    }
+    const user = await User.updateRole(req.params.id, role);
+    res.status(200).json({ message: 'Rol actualizado', user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
 
