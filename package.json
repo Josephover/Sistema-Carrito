@@ -1,0 +1,23 @@
+{
+  "name": "carrito-realtime",
+  "version": "1.0.0",
+  "description": "Sistema de carrito en tiempo real con Node.js y Socket.IO",
+  "scripts": {
+    "dev": "cd backend && npm run dev",
+    "start": "cd backend && npm start",
+    "install-all": "npm install && cd backend && npm install",
+    "build": "echo 'No build process required'",
+    "test": "echo 'No tests configured yet'"
+  },
+  "keywords": [
+    "cart",
+    "realtime",
+    "socket.io"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras - Sistema Completo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- AUTH SECTION -->
+        <div id="auth-section" class="auth-container" style="display: flex;">
+            <div class="auth-box">
+                <h1>🛒 SISTEMA DE CARRITO</h1>
+                <form id="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="email" required placeholder="usuario@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contraseña:</label>
+                        <input type="password" id="password" required placeholder="password">
+                    </div>
+                    <div class="form-group">
+                        <label>Rol:</label>
+                        <select id="role" required>
+                            <option value="">Selecciona un rol</option>
+                            <option value="admin">👨‍💼 Administrador</option>
+                            <option value="vendor">📦 Vendedor</option>
+                            <option value="customer">👤 Cliente</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+                </form>
+                <div class="demo-users">
+                    <p><strong>Demo Users:</strong></p>
+                    <p>Admin: admin@example.com / pass</p>
+                    <p>Vendor: vendor@example.com / pass</p>
+                    <p>Customer: user1@example.com / pass</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div id="admin-section" class="dashboard" style="display: none;">
+            <nav class="navbar">
+                <div class="nav-brand">🛒 ADMIN DASHBOARD</div>
+                <div class="nav-menu">
+                    <button onclick="switchAdminTab('overview')" class="nav-btn active">📊 Overview</button>
+                    <button onclick="switchAdminTab('users')" class="nav-btn">👥 Usuarios</button>
+                    <button onclick="switchAdminTab('products')" class="nav-btn">📦 Productos</button>
+                    <button onclick="switchAdminTab('orders')" class="nav-btn">📋 Pedidos</button>
+                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+                </div>
+            </nav>
+
+            <!-- Overview -->
+            <div id="overview-tab" class="tab-content" style="display: block;">
+                <div class="header">
+                    <h2>📊 Dashboard Overview</h2>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Usuarios</h3>
+                        <p class="stat-number" id="total-users">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Productos</h3>
+                        <p class="stat-number" id="total-products">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Pedidos</h3>
+                        <p class="stat-number" id="total-orders">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Ingresos</h3>
+                        <p class="stat-number" id="total-revenue">$0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="users-tab" class="tab-content">
+                <h2>👥 Gestión de Usuarios</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Nombre</th>
+                            <th>Estado</th>
+                            <th>Creado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-list"></tbody>
+                </table>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content">
+                <h2>📦 Gestión de Productos</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-list"></tbody>
+                </table>
+            </div>
+
+            <!-- Orders Tab -->
+            <div id="orders-tab" class="tab-content">
+                <h2>📋 Gestión de Pedidos</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- VENDOR DASHBOARD -->
+        <div id="vendor-section" class="dashboard" style="display: none;">
+            <nav class="navbar">
+                <div class="nav-brand">📦 VENDEDOR</div>
+                <div class="nav-menu">
+                    <button onclick="switchVendorTab('my-products')" class="nav-btn active">Mis Productos</button>
+                    <button onclick="switchVendorTab('add-product')" class="nav-btn">➕ Agregar Producto</button>
+                    <button onclick="switchVendorTab('sales')" class="nav-btn">💰 Mis Ventas</button>
+                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+                </div>
+            </nav>
+
+            <!-- My Products -->
+            <div id="my-products-tab" class="tab-content" style="display: block;">
+                <h2>Mis Productos</h2>
+                <div class="products-grid" id="vendor-products"></div>
+            </div>
+
+            <!-- Add Product -->
+            <div id="add-product-tab" class="tab-content">
+                <h2>Agregar Nuevo Producto</h2>
+                <form id="product-form" class="form-container" onsubmit="handleAddProduct(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input type="text" id="prod-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio:</label>
+                            <input type="number" id="prod-price" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoría:</label>
+                            <select id="prod-category" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Stock:</label>
+                            <input type="number" id="prod-stock" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción:</label>
+                        <textarea id="prod-description" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Crear Producto</button>
+                </form>
+            </div>
+
+            <!-- Sales -->
+            <div id="sales-tab" class="tab-content">
+                <h2>Mis Ventas</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Valor</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CLIENT DASHBOARD -->
+        <div id="client-section" class="dashboard" style="display: none;">
+            <nav class="navbar">
+                <div class="nav-brand">🛍️ TIENDA ONLINE</div>
+                <div class="nav-menu">
+                    <button onclick="switchClientTab('shop')" class="nav-btn active">🏪 Tienda</button>
+                    <button onclick="switchClientTab('cart')" class="nav-btn">🛒 Mi Carrito</button>
+                    <button onclick="switchClientTab('orders')" class="nav-btn">📦 Mis Pedidos</button>
+                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+                </div>
+            </nav>
+
+            <!-- Shop -->
+            <div id="shop-tab" class="tab-content" style="display: block;">
+                <h2>🏪 Tienda</h2>
+                <div class="filter-bar">
+                    <input type="text" id="search-products" placeholder="Buscar productos..." onkeyup="filterProducts()">
+                    <select id="category-filter" onchange="filterProducts()">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="products-grid" id="shop-products"></div>
+            </div>
+
+            <!-- Cart -->
+            <div id="cart-tab" class="tab-content">
+                <h2>🛒 Mi Carrito</h2>
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cart-items-list"></tbody>
+                </table>
+                <div class="cart-summary">
+                    <h3>Total: $<span id="cart-total">0.00</span></h3>
+                    <button onclick="checkout()" class="btn btn-success">Comprar Ahora</button>
+                    <button onclick="clearCart()" class="btn btn-danger">Vaciar Carrito</button>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <div id="orders-tab" class="tab-content">
+                <h2>📦 Mis Pedidos</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="my-orders-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
