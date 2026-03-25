@@ -33,8 +33,8 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, description, slug, active } = req.body;
-    const category = await Category.update(req.params.id, name, description, slug, active);
+    const { name, description, status } = req.body;
+    const category = await Category.update(req.params.id, name, description, status);
     res.status(200).json(category);
   } catch (error) {
     res.status(500).json({ error: error.message });

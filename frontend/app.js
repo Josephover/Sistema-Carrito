@@ -409,16 +409,17 @@ async function loadVendorData() {
     const categories = await fetch(`${API_URL}/categories`).then(r => r.json());
     allCategories = categories;
     
-    // Populate category dropdown
+    // Populate category dropdown for add product form
     const catSelect = document.getElementById('prod-category');
-    catSelect.innerHTML = allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    catSelect.innerHTML = '<option value="">-- Selecciona una categoría --</option>' + 
+      allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     
     // Mi productos (solo del vendedor actual)
     const myProducts = products.filter(p => p.seller_id === currentUser.id);
     renderVendorProducts(myProducts);
     
-    // Todos los productos visible para marketplace
-    renderMarketplaceProducts(products);
+    // Todos los productos visible para marketplace (mostrarlos directamente)
+    renderVendorMarketplaceProducts(products);
     
   } catch (error) {
     console.error('Error cargando datos vendedor:', error);
@@ -448,6 +449,37 @@ function renderVendorProducts(products) {
         <button onclick="editProduct(${p.id})" class="btn btn-sm btn-primary">✏️ Editar</button>
         <button onclick="deleteVendorProduct(${p.id})" class="btn btn-sm btn-danger">🗑️ Eliminar</button>
       </div>
+    </div>
+  `).join('');
+}
+
+// Marketplace view - mostrar todos los productos (para Vendor)
+function renderVendorMarketplaceProducts(products = allProducts) {
+  const container = document.getElementById('vendor-shop-products');
+  
+  if (products.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding: 20px;">📭 No hay productos disponibles</p>';
+    return;
+  }
+  
+  container.innerHTML = products.map(p => `
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
+      </div>
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <p class="description">${p.description || 'Sin descripción'}</p>
+        <p class="price">💰 $${parseFloat(p.price).toFixed(2)}</p>
+        <p class="stock ${p.stock > 0 ? 'available' : 'out-of-stock'}">
+          📦 ${p.stock > 0 ? `Stock: ${p.stock}` : 'Agotado'}
+        </p>
+      </div>
+      <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" 
+              class="btn btn-primary btn-block" 
+              ${p.stock <= 0 ? 'disabled' : ''}>
+        🛒 Añadir al Carrito
+      </button>
     </div>
   `).join('');
 }
@@ -553,19 +585,22 @@ async function loadMarketplaceShop() {
     allCategories = categories;
     
     // Populate category filter
-    const catFilter = document.getElementById('category-filter');
-    catFilter.innerHTML = '<option value="">Todas las categorías</option>' + 
-      allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    const catFilter = document.getElementById('vendor-category-filter');
+    if (catFilter) {
+      catFilter.innerHTML = '<option value="">Todas las categorías</option>' + 
+        allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
     
-    renderMarketplaceProducts(products);
+    // Mostrar todos los productos sin escribir (cargar inicialmente)
+    renderVendorMarketplaceProducts(products);
   } catch (error) {
     console.error('Error cargando tienda:', error);
   }
 }
 
 function filterMarketplaceProducts() {
-  const search = document.getElementById('search-products').value.toLowerCase();
-  const category = document.getElementById('category-filter').value;
+  const search = document.getElementById('vendor-search-products').value.toLowerCase();
+  const category = document.getElementById('vendor-category-filter').value;
   
   const filtered = allProducts.filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search) || 
@@ -574,7 +609,7 @@ function filterMarketplaceProducts() {
     return matchSearch && matchCategory && p.stock > 0;
   });
   
-  renderMarketplaceProducts(filtered);
+  renderVendorMarketplaceProducts(filtered);
 }
 
 // ======================== CLIENT DASHBOARD ========================

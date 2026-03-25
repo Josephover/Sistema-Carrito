@@ -132,20 +132,22 @@ VALUES
 -- CATEGORÍAS
 INSERT INTO categories (name, description, status, created_at, updated_at)
 VALUES
-  ('Electrónica', 'Productos electrónicos', 'active', NOW(), NOW()),
-  ('Ropa', 'Prendas de vestir', 'active', NOW(), NOW()),
-  ('Libros', 'Libros y publicaciones', 'active', NOW(), NOW()),
-  ('Hogar', 'Productos para el hogar', 'active', NOW(), NOW()),
-  ('Deportes', 'Artículos deportivos', 'active', NOW(), NOW());
+  ('Electrodomésticos', 'Aparatos y electrodomésticos para el hogar', 'active', NOW(), NOW()),
+  ('Celulares', 'Teléfonos móviles y accesorios', 'active', NOW(), NOW()),
+  ('Mascotas', 'Productos para mascotas y animales', 'active', NOW(), NOW()),
+  ('Accesorios', 'Accesorios y complementos varios', 'active', NOW(), NOW());
 
 -- PRODUCTOS (insertados por vendedor - user 3 = vendor@example.com)
 INSERT INTO products (name, description, price, category_id, seller_id, stock, image_url, status, created_at, updated_at)
 VALUES
-  ('Laptop Dell', 'Laptop potente para trabajo', 899.99, 1, 3, 5, 'laptop.jpg', 'active', NOW(), NOW()),
-  ('Mouse inalámbrico', 'Mouse para computadora', 25.99, 1, 3, 20, 'mouse.jpg', 'active', NOW(), NOW()),
-  ('Camiseta básica', 'Camiseta de algodón 100%', 19.99, 2, 3, 50, 'camiseta.jpg', 'active', NOW(), NOW()),
-  ('Pantalones jeans', 'Pantalones vaqueros clásicos', 59.99, 2, 3, 30, 'jeans.jpg', 'active', NOW(), NOW()),
-  ('Harry Potter Vol 1', 'Libro de magia y aventura', 15.99, 3, 3, 15, 'harrypotter.jpg', 'active', NOW(), NOW());
+  ('Refrigerador Samsung', 'Refrigerador moderno 2 puertas 18 pies', 699.99, 1, 3, 5, 'refrigerador.jpg', 'active', NOW(), NOW()),
+  ('Lavadora LG', 'Lavadora automática 12kg con control digital', 549.99, 1, 3, 8, 'lavadora.jpg', 'active', NOW(), NOW()),
+  ('iPhone 14 Pro', 'Teléfono inteligente Apple última generación', 999.99, 2, 3, 12, 'iphone14.jpg', 'active', NOW(), NOW()),
+  ('Samsung Galaxy A52', 'Smartphone Android de buena relación precio-rendimiento', 399.99, 2, 3, 15, 'galaxy.jpg', 'active', NOW(), NOW()),
+  ('Collar para perro', 'Collar ajustable cómodo para mascotas', 14.99, 3, 3, 30, 'collar.jpg', 'active', NOW(), NOW()),
+  ('Cama para gatos', 'Cama cómoda y acogedora para felinos', 34.99, 3, 3, 10, 'cama-gatos.jpg', 'active', NOW(), NOW()),
+  ('Power Bank 20000mah', 'Batería portátil para cargar dispositivos', 29.99, 4, 3, 25, 'powerbank.jpg', 'active', NOW(), NOW()),
+  ('Auriculares inalámbricos', 'Auriculares Bluetooth con cancelación de ruido', 79.99, 4, 3, 18, 'auriculares.jpg', 'active', NOW(), NOW());
 
 -- ============================================================
 -- VERIFICAR DATOS INSERTADOS
