@@ -3,7 +3,16 @@ const pool = require('../config/database');
 class Product {
   static async getAll() {
     try {
-      const result = await pool.query('SELECT * FROM products ORDER BY id');
+      const query = `
+        SELECT p.id, p.name, p.description, p.price, p.category_id, p.seller_id, 
+               p.stock, p.image_url, p.status, p.created_at, p.updated_at,
+               c.name as category, u.name as seller_name, u.email as seller_email
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN users u ON p.seller_id = u.id
+        ORDER BY p.id DESC
+      `;
+      const result = await pool.query(query);
       return result.rows;
     } catch (error) {
       console.error('Error obteniendo productos:', error);
@@ -13,7 +22,16 @@ class Product {
 
   static async getById(id) {
     try {
-      const result = await pool.query('SELECT * FROM products WHERE id = $1', [id]);
+      const query = `
+        SELECT p.id, p.name, p.description, p.price, p.category_id, p.seller_id, 
+               p.stock, p.image_url, p.status, p.created_at, p.updated_at,
+               c.name as category, u.name as seller_name, u.email as seller_email
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN users u ON p.seller_id = u.id
+        WHERE p.id = $1
+      `;
+      const result = await pool.query(query, [id]);
       return result.rows[0];
     } catch (error) {
       console.error('Error obteniendo producto:', error);
@@ -21,11 +39,13 @@ class Product {
     }
   }
 
-  static async create(name, price, description, image) {
+  static async create(name, price, description, category_id, seller_id, stock) {
     try {
       const result = await pool.query(
-        'INSERT INTO products (name, price, description, image) VALUES ($1, $2, $3, $4) RETURNING *',
-        [name, price, description, image]
+        `INSERT INTO products (name, price, description, category_id, seller_id, stock, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, $4, $5, $6, 'active', NOW(), NOW()) 
+         RETURNING *`,
+        [name, price, description, category_id, seller_id, stock]
       );
       return result.rows[0];
     } catch (error) {
@@ -34,11 +54,14 @@ class Product {
     }
   }
 
-  static async update(id, name, price, description, image) {
+  static async update(id, name, price, description, category_id, stock) {
     try {
       const result = await pool.query(
-        'UPDATE products SET name = $1, price = $2, description = $3, image = $4 WHERE id = $5 RETURNING *',
-        [name, price, description, image, id]
+        `UPDATE products 
+         SET name = $1, price = $2, description = $3, category_id = $4, stock = $5, updated_at = NOW()
+         WHERE id = $6 
+         RETURNING *`,
+        [name, price, description, category_id, stock, id]
       );
       return result.rows[0];
     } catch (error) {

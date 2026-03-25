@@ -221,60 +221,174 @@ function initializeSocket() {
 // ======================== ADMIN DASHBOARD ========================
 async function loadAdminData() {
   try {
-    const [users, products, orders] = await Promise.all([
-      fetch(`${API_URL}/users`).then(r => r.json()),
-      fetch(`${API_URL}/products`).then(r => r.json()),
-      fetch(`${API_URL}/orders`).then(r => r.json())
+    console.log('🔄 Cargando datos admin...');
+    
+    // Hacer todas las solicitudes en paralelo
+    const [usersRes, productsRes, ordersRes] = await Promise.all([
+      fetch(`${API_URL}/users`),
+      fetch(`${API_URL}/products`),
+      fetch(`${API_URL}/orders`)
     ]);
+
+    console.log('Respuestas:', usersRes.status, productsRes.status, ordersRes.status);
+
+    const users = usersRes.ok ? await usersRes.json() : [];
+    const products = productsRes.ok ? await productsRes.json() : [];
+    const orders = ordersRes.ok ? await ordersRes.json() : [];
+
+    console.log('Usuarios:', users);
+    console.log('Productos:', products);
+    console.log('Órdenes:', orders);
     
     // Stats
     document.getElementById('total-users').textContent = users.length || 0;
     document.getElementById('total-products').textContent = products.length || 0;
     document.getElementById('total-orders').textContent = orders.length || 0;
     
-    const revenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
+    const revenue = orders.reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
     document.getElementById('total-revenue').textContent = `$${revenue.toFixed(2)}`;
     
     // Users table
     const usersList = document.getElementById('users-list');
-    usersList.innerHTML = (users || []).map(u => `
-      <tr>
-        <td>${u.id}</td>
-        <td>${u.email}</td>
-        <td>${u.name || '-'}</td>
-        <td><span class="badge badge-active">${u.status || 'active'}</span></td>
-        <td>${new Date(u.created_at).toLocaleDateString()}</td>
-      </tr>
-    `).join('');
+    if (users.length === 0) {
+      usersList.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">📭 No hay usuarios</td></tr>';
+    } else {
+      usersList.innerHTML = users.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.email}</td>
+          <td>${u.name || '-'}</td>
+          <td>
+            <select class="role-select" onchange="updateUserRole(${u.id}, this.value)">
+              <option value="marketplace" ${u.role === 'marketplace' ? 'selected' : ''}>Marketplace</option>
+              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
+          </td>
+          <td><span class="badge badge-active">${u.status || 'active'}</span></td>
+          <td>${new Date(u.created_at).toLocaleDateString()}</td>
+          <td>
+            <button onclick="deleteAdminUser(${u.id})" class="btn btn-sm btn-danger">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
     
     // Products table
     const productsList = document.getElementById('products-list');
-    productsList.innerHTML = (products || []).map(p => `
-      <tr>
-        <td>${p.id}</td>
-        <td>${p.name}</td>
-        <td>$${p.price}</td>
-        <td>${p.stock}</td>
-        <td>${p.category || '-'}</td>
-        <td><span class="badge badge-active">${p.status || 'active'}</span></td>
-      </tr>
-    `).join('');
+    if (products.length === 0) {
+      productsList.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">📭 No hay productos</td></tr>';
+    } else {
+      productsList.innerHTML = products.map(p => `
+        <tr>
+          <td>${p.id}</td>
+          <td>${p.name}</td>
+          <td>$${parseFloat(p.price).toFixed(2)}</td>
+          <td>${p.stock}</td>
+          <td>${p.category || '-'}</td>
+          <td><span class="badge badge-active">${p.status || 'active'}</span></td>
+          <td>
+            <button onclick="deleteAdminProduct(${p.id})" class="btn btn-sm btn-danger">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
     
     // Orders table
     const ordersList = document.getElementById('orders-list');
-    ordersList.innerHTML = (orders || []).map(o => `
-      <tr>
-        <td>${o.order_number}</td>
-        <td>${o.user_email || '-'}</td>
-        <td>$${o.total_amount}</td>
-        <td><span class="badge badge-pending">${o.status || 'pending'}</span></td>
-        <td>${new Date(o.created_at).toLocaleDateString()}</td>
-      </tr>
-    `).join('');
+    if (orders.length === 0) {
+      ordersList.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">📭 No hay órdenes</td></tr>';
+    } else {
+      ordersList.innerHTML = orders.map(o => `
+        <tr>
+          <td>${o.id}</td>
+          <td>${o.user_email || '-'}</td>
+          <td>$${parseFloat(o.total_amount).toFixed(2)}</td>
+          <td>
+            <select onchange="updateOrderStatus(${o.id}, this.value)">
+              <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+              <option value="paid" ${o.status === 'paid' ? 'selected' : ''}>Pagado</option>
+              <option value="shipped" ${o.status === 'shipped' ? 'selected' : ''}>Enviado</option>
+              <option value="delivered" ${o.status === 'delivered' ? 'selected' : ''}>Entregado</option>
+            </select>
+          </td>
+          <td>${new Date(o.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
+    }
     
   } catch (error) {
-    console.error('Error cargando datos admin:', error);
+    console.error('❌ Error cargando datos admin:', error);
     showNotification('❌ Error cargando datos', 'error');
+  }
+}
+
+// Actualizar rol de usuario
+async function updateUserRole(userId, newRole) {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: newRole })
+    });
+    
+    if (response.ok) {
+      showNotification(`✅ Rol actualizado a ${newRole}`);
+      loadAdminData();
+    }
+  } catch (error) {
+    showNotification('❌ Error actualizando rol', 'error');
+  }
+}
+
+// Eliminar usuario desde admin
+async function deleteAdminUser(userId) {
+  if (confirm('¿Deseas eliminar este usuario permanentemente?')) {
+    try {
+      const response = await fetch(`${API_URL}/users/${userId}`, { method: 'DELETE' });
+      if (response.ok) {
+        showNotification('✅ Usuario eliminado');
+        loadAdminData();
+      } else {
+        showNotification('❌ Error eliminando usuario', 'error');
+      }
+    } catch (error) {
+      showNotification('❌ Error eliminando usuario', 'error');
+    }
+  }
+}
+
+// Eliminar producto desde admin
+async function deleteAdminProduct(productId) {
+  if (confirm('¿Deseas eliminar este producto permanentemente?')) {
+    try {
+      const response = await fetch(`${API_URL}/products/${productId}`, { method: 'DELETE' });
+      if (response.ok) {
+        showNotification('✅ Producto eliminado');
+        loadAdminData();
+      } else {
+        showNotification('❌ Error eliminando producto', 'error');
+      }
+    } catch (error) {
+      showNotification('❌ Error eliminando producto', 'error');
+    }
+  }
+}
+
+// Actualizar estado de orden
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    
+    if (response.ok) {
+      showNotification(`✅ Estado actualizado a ${newStatus}`);
+      loadAdminData();
+    }
+  } catch (error) {
+    showNotification('❌ Error actualizando estado', 'error');
   }
 }
 
@@ -299,8 +413,12 @@ async function loadVendorData() {
     const catSelect = document.getElementById('prod-category');
     catSelect.innerHTML = allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     
-    // My products
-    renderVendorProducts(products);
+    // Mi productos (solo del vendedor actual)
+    const myProducts = products.filter(p => p.seller_id === currentUser.id);
+    renderVendorProducts(myProducts);
+    
+    // Todos los productos visible para marketplace
+    renderMarketplaceProducts(products);
     
   } catch (error) {
     console.error('Error cargando datos vendedor:', error);
@@ -309,16 +427,58 @@ async function loadVendorData() {
 
 function renderVendorProducts(products) {
   const container = document.getElementById('vendor-products');
+  
+  if (products.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding: 20px;">📦 No tienes productos creados aún</p>';
+    return;
+  }
+  
   container.innerHTML = products.map(p => `
     <div class="product-card">
-      <img src="https://via.placeholder.com/200?text=${p.name}" alt="${p.name}">
-      <h3>${p.name}</h3>
-      <p class="price">$${p.price}</p>
-      <p class="stock">Stock: ${p.stock}</p>
-      <div class="card-actions">
-        <button onclick="editProduct(${p.id})" class="btn btn-sm btn-primary">Editar</button>
-        <button onclick="deleteProduct(${p.id})" class="btn btn-sm btn-danger">Eliminar</button>
+      <div class="product-image">
+        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
       </div>
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <p class="price">💰 $${parseFloat(p.price).toFixed(2)}</p>
+        <p class="stock">📦 Stock: ${p.stock}</p>
+        <p class="description">${p.description || 'Sin descripción'}</p>
+      </div>
+      <div class="card-actions">
+        <button onclick="editProduct(${p.id})" class="btn btn-sm btn-primary">✏️ Editar</button>
+        <button onclick="deleteVendorProduct(${p.id})" class="btn btn-sm btn-danger">🗑️ Eliminar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Marketplace view - mostrar todos los productos
+function renderMarketplaceProducts(products = allProducts) {
+  const container = document.getElementById('shop-products');
+  
+  if (products.length === 0) {
+    container.innerHTML = '<p style="text-align:center; padding: 20px;">📭 No hay productos disponibles</p>';
+    return;
+  }
+  
+  container.innerHTML = products.map(p => `
+    <div class="product-card">
+      <div class="product-image">
+        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
+      </div>
+      <div class="product-info">
+        <h3>${p.name}</h3>
+        <p class="description">${p.description || 'Sin descripción'}</p>
+        <p class="price">💰 $${parseFloat(p.price).toFixed(2)}</p>
+        <p class="stock ${p.stock > 0 ? 'available' : 'out-of-stock'}">
+          📦 ${p.stock > 0 ? `Stock: ${p.stock}` : 'Agotado'}
+        </p>
+      </div>
+      <button onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" 
+              class="btn btn-primary btn-block" 
+              ${p.stock <= 0 ? 'disabled' : ''}>
+        🛒 Añadir al Carrito
+      </button>
     </div>
   `).join('');
 }
@@ -354,16 +514,18 @@ function editProduct(id) {
   showNotification('📝 Funcionalidad de edición proximamente');
 }
 
-async function deleteProduct(id) {
-  if (confirm('¿Deseas eliminar este producto?')) {
+async function deleteVendorProduct(id) {
+  if (confirm('¿Deseas eliminar este producto? Esta acción no se puede deshacer.')) {
     try {
       const response = await fetch(`${API_URL}/products/${id}`, { method: 'DELETE' });
       if (response.ok) {
-        showNotification('✅ Producto eliminado');
-        loadVendorData();
+        showNotification('✅ Producto eliminado correctamente');
+        loadVendorData(); // Recargar datos automáticamente
+      } else {
+        showNotification('❌ Error eliminando el producto', 'error');
       }
     } catch (error) {
-      showNotification('❌ Error eliminando producto', 'error');
+      showNotification('❌ Error eliminando el producto', 'error');
     }
   }
 }
@@ -374,6 +536,45 @@ function switchVendorTab(tab) {
   
   document.querySelectorAll('#vendor-section .nav-btn').forEach(el => el.classList.remove('active'));
   event.target.classList.add('active');
+  
+  // Cargar datos específicos cuando se navega a la tienda
+  if (tab === 'shop') {
+    loadMarketplaceShop();
+  }
+}
+
+// Cargar tienda marketplace
+async function loadMarketplaceShop() {
+  try {
+    const products = await fetch(`${API_URL}/products`).then(r => r.json());
+    allProducts = products;
+    
+    const categories = await fetch(`${API_URL}/categories`).then(r => r.json());
+    allCategories = categories;
+    
+    // Populate category filter
+    const catFilter = document.getElementById('category-filter');
+    catFilter.innerHTML = '<option value="">Todas las categorías</option>' + 
+      allCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    
+    renderMarketplaceProducts(products);
+  } catch (error) {
+    console.error('Error cargando tienda:', error);
+  }
+}
+
+function filterMarketplaceProducts() {
+  const search = document.getElementById('search-products').value.toLowerCase();
+  const category = document.getElementById('category-filter').value;
+  
+  const filtered = allProducts.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search) || 
+                       (p.description && p.description.toLowerCase().includes(search));
+    const matchCategory = !category || p.category_id == category;
+    return matchSearch && matchCategory && p.stock > 0;
+  });
+  
+  renderMarketplaceProducts(filtered);
 }
 
 // ======================== CLIENT DASHBOARD ========================
