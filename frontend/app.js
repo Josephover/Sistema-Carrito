@@ -20,26 +20,129 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ======================== AUTENTICACIÓN ========================
-function handleLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const role = document.getElementById('role').value;
 
-  // Mock login (en producción, hacer autenticación real)
-  if (email && password && role) {
-    currentUser = { id: 1, email, role };
-    currentRole = role;
-    
-    localStorage.setItem('user', JSON.stringify(currentUser));
-    localStorage.setItem('role', role);
-    
-    initializeSocket();
-    showDashboard(role);
-    
-    // Mostrar notificación
-    showNotification(`✅ Bienvenido ${email}!`);
+// Mostrar formulario de login
+function showLoginForm() {
+  document.getElementById('register-form-section').style.display = 'none';
+  document.getElementById('login-form-section').style.display = 'block';
+  document.getElementById('register-error').style.display = 'none';
+  document.getElementById('register-success').style.display = 'none';
+}
+
+// Mostrar formulario de registro
+function showRegisterForm() {
+  document.getElementById('login-form-section').style.display = 'none';
+  document.getElementById('register-form-section').style.display = 'block';
+  document.getElementById('login-error').style.display = 'none';
+}
+
+// Manejar registro
+async function handleRegister(e) {
+  e.preventDefault();
+  const name = document.getElementById('register-name').value;
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
+  const confirm = document.getElementById('register-confirm').value;
+  const errorDiv = document.getElementById('register-error');
+  const successDiv = document.getElementById('register-success');
+
+  // Limpiar mensajes previos
+  errorDiv.style.display = 'none';
+  successDiv.style.display = 'none';
+
+  // Validaciones
+  if (!name || !email || !password || !confirm) {
+    showError('Todos los campos son obligatorios', errorDiv);
+    return;
   }
+
+  if (password !== confirm) {
+    showError('Las contraseñas no coinciden', errorDiv);
+    return;
+  }
+
+  if (password.length < 5) {
+    showError('La contraseña debe tener al menos 5 caracteres', errorDiv);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, confirmPassword: confirm })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Error en el registro');
+    }
+
+    // Mostrar éxito
+    successDiv.textContent = '✅ Registro exitoso. Redirigiendo al login...';
+    successDiv.style.display = 'block';
+
+    // Limpiar formulario
+    document.getElementById('register-form').reset();
+
+    // Redirigir a login después de 2 segundos
+    setTimeout(() => {
+      showLoginForm();
+    }, 2000);
+  } catch (error) {
+    showError(error.message, errorDiv);
+  }
+}
+
+// Manejar login
+async function handleLogin(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const errorDiv = document.getElementById('login-error');
+
+  errorDiv.style.display = 'none';
+
+  if (!email || !password) {
+    showError('Email y contraseña son requeridos', errorDiv);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Error en el ingreso');
+    }
+
+    // Guardar usuario en localStorage
+    currentUser = data.user;
+    currentRole = data.user.role;
+
+    localStorage.setItem('user', JSON.stringify(currentUser));
+    localStorage.setItem('role', currentRole);
+
+    // Inicializar y mostrar dashboard
+    initializeSocket();
+    showDashboard(currentRole);
+
+    showNotification(`✅ ¡Bienvenido ${currentUser.name}!`);
+  } catch (error) {
+    showError(error.message, errorDiv);
+  }
+}
+
+// Función auxiliar para mostrar errores
+function showError(message, element) {
+  element.textContent = message;
+  element.style.display = 'block';
 }
 
 function logout() {
@@ -60,15 +163,13 @@ function logout() {
 function showDashboard(role) {
   document.getElementById('auth-section').style.display = 'none';
   document.getElementById('admin-section').style.display = role === 'admin' ? 'block' : 'none';
-  document.getElementById('vendor-section').style.display = role === 'vendor' ? 'block' : 'none';
-  document.getElementById('client-section').style.display = role === 'customer' ? 'block' : 'none';
+  document.getElementById('vendor-section').style.display = role === 'marketplace' ? 'block' : 'none';
+  document.getElementById('client-section').style.display = 'none';
   
   if (role === 'admin') {
     loadAdminData();
-  } else if (role === 'vendor') {
+  } else if (role === 'marketplace') {
     loadVendorData();
-  } else if (role === 'customer') {
-    loadClientData();
   }
 }
 

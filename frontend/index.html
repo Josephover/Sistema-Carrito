@@ -5,39 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - Sistema Completo</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth-styles.css">
 </head>
 <body>
     <div id="app">
         <!-- AUTH SECTION -->
-        <div id="auth-section" class="auth-container" style="display: flex;">
-            <div class="auth-box">
-                <h1>🛒 SISTEMA DE CARRITO</h1>
+        <div id="auth-section" class="auth-container">
+            <!-- LOGIN FORM -->
+            <div id="login-form-section" class="auth-box animated-in">
+                <div class="auth-header">
+                    <h1>🛒 CARRITO</h1>
+                    <p>Sistema Marketplace</p>
+                </div>
+                
                 <form id="login-form" onsubmit="handleLogin(event)">
                     <div class="form-group">
-                        <label>Email:</label>
-                        <input type="email" id="email" required placeholder="usuario@example.com">
+                        <label for="login-email">📧 Email:</label>
+                        <input type="email" id="login-email" required placeholder="correo@ejemplo.com">
                     </div>
                     <div class="form-group">
-                        <label>Contraseña:</label>
-                        <input type="password" id="password" required placeholder="password">
-                    </div>
-                    <div class="form-group">
-                        <label>Rol:</label>
-                        <select id="role" required>
-                            <option value="">Selecciona un rol</option>
-                            <option value="admin">👨‍💼 Administrador</option>
-                            <option value="vendor">📦 Vendedor</option>
-                            <option value="customer">👤 Cliente</option>
-                        </select>
+                        <label for="login-password">🔐 Contraseña:</label>
+                        <input type="password" id="login-password" required placeholder="Tu contraseña">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
                 </form>
-                <div class="demo-users">
-                    <p><strong>Demo Users:</strong></p>
-                    <p>Admin: admin@example.com / pass</p>
-                    <p>Vendor: vendor@example.com / pass</p>
-                    <p>Customer: user1@example.com / pass</p>
+
+                <div class="auth-divider">o</div>
+
+                <button type="button" onclick="showRegisterForm()" class="btn btn-secondary btn-block">
+                    ✨ Crear Cuenta Nueva
+                </button>
+
+                <div id="login-error" class="alert alert-danger" style="display: none;"></div>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="register-form-section" class="auth-box" style="display: none;">
+                <div class="auth-header">
+                    <h1>🎯 Crear Cuenta</h1>
+                    <p>Únete a nuestro Marketplace</p>
                 </div>
+
+                <form id="register-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="register-name">👤 Nombre Completo:</label>
+                        <input type="text" id="register-name" required placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">📧 Email:</label>
+                        <input type="email" id="register-email" required placeholder="correo@ejemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">🔐 Contraseña:</label>
+                        <input type="password" id="register-password" required placeholder="Mínimo 5 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm">🔐 Confirmar Contraseña:</label>
+                        <input type="password" id="register-confirm" required placeholder="Repite tu contraseña">
+                    </div>
+
+                    <div class="role-info">
+                        <p>✅ <strong>Rol automático:</strong> Marketplace</p>
+                        <p class="small">Podrás comprar y vender en nuestra plataforma</p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+                </form>
+
+                <div class="auth-divider">o</div>
+
+                <button type="button" onclick="showLoginForm()" class="btn btn-secondary btn-block">
+                    ← Volver al Ingreso
+                </button>
+
+                <div id="register-error" class="alert alert-danger" style="display: none;"></div>
+                <div id="register-success" class="alert alert-success" style="display: none;"></div>
             </div>
         </div>
 
