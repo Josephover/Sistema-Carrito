@@ -85,14 +85,45 @@
 
         <!-- ADMIN DASHBOARD -->
         <div id="admin-section" class="dashboard" style="display: none;">
-            <nav class="navbar">
-                <div class="nav-brand">🛒 ADMIN DASHBOARD</div>
-                <div class="nav-menu">
-                    <button onclick="switchAdminTab('overview')" class="nav-btn active">📊 Overview</button>
-                    <button onclick="switchAdminTab('users')" class="nav-btn">👥 Usuarios</button>
-                    <button onclick="switchAdminTab('products')" class="nav-btn">📦 Productos</button>
-                    <button onclick="switchAdminTab('orders')" class="nav-btn">📋 Pedidos</button>
-                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+            <nav class="navbar navbar-dark navbar-admin">
+                <div class="navbar-wrapper">
+                    <div class="navbar-brand">
+                        <span class="brand-icon">🛒</span>
+                        <span class="brand-name">Admin Panel</span>
+                    </div>
+                    
+                    <!-- Hamburger Menu -->
+                    <button class="hamburger" onclick="toggleAdminMenu()">
+                        <svg class="hamburger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Navigation Menu -->
+                    <div class="nav-menu" id="admin-menu">
+                        <div class="nav-links">
+                            <button onclick="switchAdminTab('overview')" class="nav-link active">
+                                <span class="nav-icon">📊</span>
+                                <span class="nav-text">Overview</span>
+                            </button>
+                            <button onclick="switchAdminTab('users')" class="nav-link">
+                                <span class="nav-icon">👥</span>
+                                <span class="nav-text">Usuarios</span>
+                            </button>
+                            <button onclick="switchAdminTab('products')" class="nav-link">
+                                <span class="nav-icon">📦</span>
+                                <span class="nav-text">Productos</span>
+                            </button>
+                            <button onclick="switchAdminTab('orders')" class="nav-link">
+                                <span class="nav-icon">📋</span>
+                                <span class="nav-text">Pedidos</span>
+                            </button>
+                        </div>
+                        <button onclick="logout()" class="nav-logout">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-text">Salir</span>
+                        </button>
+                    </div>
                 </div>
             </nav>
 
@@ -179,13 +210,32 @@
 
         <!-- VENDOR DASHBOARD -->
         <div id="vendor-section" class="dashboard" style="display: none;">
-            <nav class="navbar">
-                <div class="nav-brand">� MARKETPLACE</div>
-                <div class="nav-menu">
-                    <button onclick="switchVendorTab('my-products')" class="nav-btn active">📦 Mis Productos</button>
-                    <button onclick="switchVendorTab('add-product')" class="nav-btn">➕ Agregar Producto</button>
-                    <button onclick="switchVendorTab('shop')" class="nav-btn">🏪 Tienda Online</button>
-                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+            <nav class="navbar navbar-vendor">
+                <div class="navbar-container">
+                    <div class="navbar-brand">
+                        <span class="brand-logo">🏪</span>
+                        <span class="brand-text">MARKETPLACE</span>
+                    </div>
+                    
+                    <div class="navbar-center">
+                        <button onclick="switchVendorTab('my-products')" class="nav-btn active">
+                            <span class="nav-icon">📦</span>
+                            <span class="nav-label">Mis Productos</span>
+                        </button>
+                        <button onclick="switchVendorTab('add-product')" class="nav-btn">
+                            <span class="nav-icon">➕</span>
+                            <span class="nav-label">Agregar</span>
+                        </button>
+                        <button onclick="switchVendorTab('shop')" class="nav-btn">
+                            <span class="nav-icon">🏪</span>
+                            <span class="nav-label">Tienda</span>
+                        </button>
+                    </div>
+                    
+                    <button onclick="logout()" class="nav-btn nav-logout">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-label">Salir</span>
+                    </button>
                 </div>
             </nav>
 
@@ -242,13 +292,32 @@
 
         <!-- CLIENT DASHBOARD -->
         <div id="client-section" class="dashboard" style="display: none;">
-            <nav class="navbar">
-                <div class="nav-brand">🛍️ TIENDA ONLINE</div>
-                <div class="nav-menu">
-                    <button onclick="switchClientTab('shop')" class="nav-btn active">🏪 Tienda</button>
-                    <button onclick="switchClientTab('cart')" class="nav-btn">🛒 Mi Carrito</button>
-                    <button onclick="switchClientTab('orders')" class="nav-btn">📦 Mis Pedidos</button>
-                    <button onclick="logout()" class="nav-btn logout">Salir</button>
+            <nav class="navbar navbar-client">
+                <div class="navbar-container">
+                    <div class="navbar-brand">
+                        <span class="brand-logo">🛍️</span>
+                        <span class="brand-text">TIENDA</span>
+                    </div>
+                    
+                    <div class="navbar-center">
+                        <button onclick="switchClientTab('shop')" class="nav-btn active">
+                            <span class="nav-icon">🏪</span>
+                            <span class="nav-label">Tienda</span>
+                        </button>
+                        <button onclick="switchClientTab('cart')" class="nav-btn">
+                            <span class="nav-icon">🛒</span>
+                            <span class="nav-label">Mi Carrito</span>
+                        </button>
+                        <button onclick="switchClientTab('orders')" class="nav-btn">
+                            <span class="nav-icon">📦</span>
+                            <span class="nav-label">Mis Pedidos</span>
+                        </button>
+                    </div>
+                    
+                    <button onclick="logout()" class="nav-btn nav-logout">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-label">Salir</span>
+                    </button>
                 </div>
             </nav>
 

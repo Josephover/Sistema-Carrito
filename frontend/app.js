@@ -17,6 +17,23 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSocket();
     showDashboard(currentRole);
   }
+  
+  // Close menus when clicking outside
+  document.addEventListener('click', (e) => {
+    const adminMenu = document.getElementById('admin-menu');
+    const vendorMenu = document.getElementById('vendor-menu');
+    const clientMenu = document.getElementById('client-menu');
+    
+    if (adminMenu && !adminMenu.parentElement.contains(e.target)) {
+      adminMenu.classList.remove('active');
+    }
+    if (vendorMenu && !vendorMenu.parentElement.contains(e.target)) {
+      vendorMenu.classList.remove('active');
+    }
+    if (clientMenu && !clientMenu.parentElement.contains(e.target)) {
+      clientMenu.classList.remove('active');
+    }
+  });
 });
 
 // ======================== AUTENTICACIÓN ========================
@@ -392,12 +409,46 @@ async function updateOrderStatus(orderId, newStatus) {
   }
 }
 
+// ======================== TOGGLE MENUS ========================
+function toggleAdminMenu() {
+  const menu = document.getElementById('admin-menu');
+  menu.classList.toggle('active');
+}
+
+function toggleVendorMenu() {
+  const menu = document.getElementById('vendor-menu');
+  menu.classList.toggle('active');
+}
+
+function toggleClientMenu() {
+  const menu = document.getElementById('client-menu');
+  menu.classList.toggle('active');
+}
+
+// Close menu when clicking on a link
+function closeAdminMenu() {
+  const menu = document.getElementById('admin-menu');
+  menu.classList.remove('active');
+}
+
+function closeVendorMenu() {
+  const menu = document.getElementById('vendor-menu');
+  menu.classList.remove('active');
+}
+
+function closeClientMenu() {
+  const menu = document.getElementById('client-menu');
+  menu.classList.remove('active');
+}
+
+// ======================== ADMIN DASHBOARD ========================
 function switchAdminTab(tab) {
   document.querySelectorAll('#admin-section .tab-content').forEach(el => el.style.display = 'none');
   document.getElementById(tab + '-tab').style.display = 'block';
   
-  document.querySelectorAll('#admin-section .nav-btn').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('#admin-section .nav-link').forEach(el => el.classList.remove('active'));
+  event.target.closest('.nav-link').classList.add('active');
+  closeAdminMenu();
 }
 
 // ======================== VENDOR DASHBOARD ========================
@@ -566,8 +617,9 @@ function switchVendorTab(tab) {
   document.querySelectorAll('#vendor-section .tab-content').forEach(el => el.style.display = 'none');
   document.getElementById(tab + '-tab').style.display = 'block';
   
-  document.querySelectorAll('#vendor-section .nav-btn').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('#vendor-section .nav-link').forEach(el => el.classList.remove('active'));
+  event.target.closest('.nav-link').classList.add('active');
+  closeVendorMenu();
   
   // Cargar datos específicos cuando se navega a la tienda
   if (tab === 'shop') {
@@ -785,8 +837,9 @@ function switchClientTab(tab) {
   document.querySelectorAll('#client-section .tab-content').forEach(el => el.style.display = 'none');
   document.getElementById(tab + '-tab').style.display = 'block';
   
-  document.querySelectorAll('#client-section .nav-btn').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
+  document.querySelectorAll('#client-section .nav-link').forEach(el => el.classList.remove('active'));
+  event.target.closest('.nav-link').classList.add('active');
+  closeClientMenu();
 }
 
 // ======================== FUNCIONES AUXILIARES ========================
