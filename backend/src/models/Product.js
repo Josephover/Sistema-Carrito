@@ -39,13 +39,13 @@ class Product {
     }
   }
 
-  static async create(name, price, description, category_id, seller_id, stock) {
+  static async create(name, price, description, category_id, seller_id, stock, image_url = null) {
     try {
       const result = await pool.query(
-        `INSERT INTO products (name, price, description, category_id, seller_id, stock, status, created_at, updated_at) 
-         VALUES ($1, $2, $3, $4, $5, $6, 'active', NOW(), NOW()) 
+        `INSERT INTO products (name, price, description, category_id, seller_id, stock, image_url, status, created_at, updated_at) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', NOW(), NOW()) 
          RETURNING *`,
-        [name, price, description, category_id, seller_id, stock]
+        [name, price, description, category_id, seller_id, stock, image_url]
       );
       return result.rows[0];
     } catch (error) {

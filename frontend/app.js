@@ -548,7 +548,7 @@ function renderVendorProducts(products) {
   container.innerHTML = products.map(p => `
     <div class="product-card">
       <div class="product-image">
-        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">`}
       </div>
       <div class="product-info">
         <h3>${p.name}</h3>
@@ -576,7 +576,7 @@ function renderVendorMarketplaceProducts(products = allProducts) {
   container.innerHTML = products.map(p => `
     <div class="product-card">
       <div class="product-image">
-        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">`}
       </div>
       <div class="product-info">
         <h3>${p.name}</h3>
@@ -607,7 +607,7 @@ function renderMarketplaceProducts(products = allProducts) {
   container.innerHTML = products.map(p => `
     <div class="product-card">
       <div class="product-image">
-        <img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<img src="https://via.placeholder.com/200?text=${encodeURIComponent(p.name)}" alt="${p.name}">`}
       </div>
       <div class="product-info">
         <h3>${p.name}</h3>
@@ -626,26 +626,52 @@ function renderMarketplaceProducts(products = allProducts) {
   `).join('');
 }
 
+// Preview de imagen del producto
+function previewProductImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('image-preview').src = e.target.result;
+      document.getElementById('image-preview-container').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+// Limpiar imagen del producto
+function clearProductImage() {
+  document.getElementById('prod-image').value = '';
+  document.getElementById('image-preview-container').style.display = 'none';
+}
+
 async function handleAddProduct(e) {
   e.preventDefault();
-  const product = {
-    name: document.getElementById('prod-name').value,
-    price: parseFloat(document.getElementById('prod-price').value),
-    category_id: document.getElementById('prod-category').value,
-    stock: parseInt(document.getElementById('prod-stock').value),
-    description: document.getElementById('prod-description').value
-  };
+  
+  // Usar FormData para enviar archivo e información
+  const formData = new FormData();
+  formData.append('name', document.getElementById('prod-name').value);
+  formData.append('price', parseFloat(document.getElementById('prod-price').value));
+  formData.append('category_id', document.getElementById('prod-category').value);
+  formData.append('stock', parseInt(document.getElementById('prod-stock').value));
+  formData.append('description', document.getElementById('prod-description').value);
+  
+  // Agregar imagen si existe
+  const imageFile = document.getElementById('prod-image').files[0];
+  if (imageFile) {
+    formData.append('image', imageFile);
+  }
   
   try {
     const response = await fetch(`${API_URL}/products`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(product)
+      body: formData
     });
     
     if (response.ok) {
       showNotification('✅ Producto creado exitosamente');
       document.getElementById('product-form').reset();
+      clearProductImage();
       loadVendorData();
     }
   } catch (error) {

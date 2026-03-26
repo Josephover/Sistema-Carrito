@@ -321,6 +321,26 @@
                         <label>Descripción:</label>
                         <textarea id="prod-description" rows="4"></textarea>
                     </div>
+                    
+                    <!-- Image Upload Section -->
+                    <div class="form-group image-upload-section">
+                        <label for="prod-image">📷 Subir Imagen del Producto:</label>
+                        <div class="image-upload-container">
+                            <input type="file" id="prod-image" accept="image/*" onchange="previewProductImage(event)">
+                            <div class="image-upload-label">
+                                <span class="material-icons">cloud_upload</span>
+                                <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
+                                <small>Formatos: JPEG, PNG, GIF, WebP | Máximo: 5MB</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <div id="image-preview-container" class="image-preview-container" style="display: none;">
+                            <img id="image-preview" src="" alt="vista previa" class="image-preview">
+                            <button type="button" class="btn-clear-image" onclick="clearProductImage()">✕</button>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-success">✅ Crear Producto</button>
                 </form>
             </div>

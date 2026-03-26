@@ -12,6 +12,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Servir carpeta uploads como estática
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, '../../frontend')));
 

@@ -42,7 +42,13 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'Campos requeridos: name, price, category_id' });
     }
 
-    const product = await Product.create(name, price, description, category_id, seller_id, stock || 0);
+    // Generar URL de la imagen si existe archivo
+    let image_url = null;
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
+
+    const product = await Product.create(name, price, description, category_id, seller_id, stock || 0, image_url);
     res.status(201).json(product);
   } catch (error) {
     console.error('Error creando producto:', error);
@@ -59,7 +65,13 @@ exports.create = async (req, res) => {
       return res.status(400).json({ error: 'Campos requeridos: name, price, category_id' });
     }
 
-    const product = await Product.create(name, price, description, category_id, seller_id, stock || 0);
+    // Generar URL de la imagen si existe archivo
+    let image_url = null;
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
+
+    const product = await Product.create(name, price, description, category_id, seller_id, stock || 0, image_url);
     res.status(201).json(product);
   } catch (error) {
     console.error('Error creando producto:', error);
