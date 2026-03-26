@@ -655,6 +655,7 @@ async function handleAddProduct(e) {
   formData.append('category_id', document.getElementById('prod-category').value);
   formData.append('stock', parseInt(document.getElementById('prod-stock').value));
   formData.append('description', document.getElementById('prod-description').value);
+  formData.append('seller_id', currentUser.id);
   
   // Agregar imagen si existe
   const imageFile = document.getElementById('prod-image').files[0];
