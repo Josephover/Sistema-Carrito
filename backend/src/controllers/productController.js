@@ -83,9 +83,17 @@ exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, description, category_id, stock } = req.body;
-    const product = await Product.update(id, name, price, description, category_id, stock);
+    
+    // Generar URL de la imagen si existe archivo nuevo
+    let image_url = null;
+    if (req.file) {
+      image_url = `/uploads/${req.file.filename}`;
+    }
+    
+    const product = await Product.update(id, name, price, description, category_id, stock, image_url);
     res.status(200).json(product);
   } catch (error) {
+    console.error('Error actualizando producto:', error);
     res.status(500).json({ error: 'Error actualizando producto', details: error.message });
   }
 };

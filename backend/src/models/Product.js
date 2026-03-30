@@ -54,15 +54,25 @@ class Product {
     }
   }
 
-  static async update(id, name, price, description, category_id, stock) {
+  static async update(id, name, price, description, category_id, stock, image_url = null) {
     try {
-      const result = await pool.query(
-        `UPDATE products 
-         SET name = $1, price = $2, description = $3, category_id = $4, stock = $5, updated_at = NOW()
-         WHERE id = $6 
-         RETURNING *`,
-        [name, price, description, category_id, stock, id]
-      );
+      let query, params;
+      
+      if (image_url) {
+        query = `UPDATE products 
+                 SET name = $1, price = $2, description = $3, category_id = $4, stock = $5, image_url = $6, updated_at = NOW()
+                 WHERE id = $7 
+                 RETURNING *`;
+        params = [name, price, description, category_id, stock, image_url, id];
+      } else {
+        query = `UPDATE products 
+                 SET name = $1, price = $2, description = $3, category_id = $4, stock = $5, updated_at = NOW()
+                 WHERE id = $6 
+                 RETURNING *`;
+        params = [name, price, description, category_id, stock, id];
+      }
+      
+      const result = await pool.query(query, params);
       return result.rows[0];
     } catch (error) {
       console.error('Error actualizando producto:', error);
