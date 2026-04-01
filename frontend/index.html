@@ -329,8 +329,8 @@
                     <!-- Image Upload Section -->
                     <div class="form-group image-upload-section">
                         <label for="prod-image">📷 Subir Imagen del Producto:</label>
-                        <div class="image-upload-container">
-                            <input type="file" id="prod-image" accept="image/*" onchange="previewProductImage(event)">
+                        <div class="image-upload-container" onclick="document.getElementById('prod-image').click()">
+                            <input type="file" id="prod-image" accept="image/*" onchange="previewProductImage(event)" style="display: none;">
                             <div class="image-upload-label">
                                 <span class="material-icons">cloud_upload</span>
                                 <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
@@ -604,8 +604,8 @@
                 <!-- Image Upload Section -->
                 <div class="form-group image-upload-section">
                     <label for="edit-prod-image">📷 Cambiar Imagen del Producto (opcional):</label>
-                    <div class="image-upload-container">
-                        <input type="file" id="edit-prod-image" accept="image/*" onchange="previewEditProductImage(event)">
+                    <div class="image-upload-container" onclick="document.getElementById('edit-prod-image').click()">
+                        <input type="file" id="edit-prod-image" accept="image/*" onchange="previewEditProductImage(event)" style="display: none;">
                         <div class="image-upload-label">
                             <span class="material-icons">cloud_upload</span>
                             <p>Arrastra una imagen aquí o haz clic para seleccionar</p>
