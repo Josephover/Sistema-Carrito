@@ -1129,9 +1129,18 @@ async function updateQuantity(itemId, quantity) {
 
 async function removeFromCart(itemId) {
   try {
-    await fetch(`${API_URL}/cart/${cartId}/items/${itemId}`, { method: 'DELETE' });
-    socket.emit('remove_from_cart', { cartId, itemId });
+    const response = await fetch(`${API_URL}/cart/${cartId}/items/${itemId}`, { 
+      method: 'DELETE' 
+    });
+    
+    if (response.ok) {
+      showNotification('✅ Producto eliminado del carrito', 'success');
+      await loadCart();
+    } else {
+      throw new Error('Error al eliminar');
+    }
   } catch (error) {
+    console.error('Error removiendo item:', error);
     showNotification('❌ Error removiendo item', 'error');
   }
 }
