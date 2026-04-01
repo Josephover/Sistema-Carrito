@@ -201,6 +201,9 @@ function showDashboard(role) {
       if (vendorUsername) vendorUsername.textContent = currentUser.name;
       if (vendorDropdownName) vendorDropdownName.textContent = currentUser.name;
       if (vendorDropdownEmail) vendorDropdownEmail.textContent = currentUser.email || 'vendor@email.com';
+      
+      // Inicializar carrito para vendedor/cliente
+      initializeCart();
     } else if (role === 'customer') {
       const clientUsername = document.getElementById('client-username');
       const clientDropdownName = document.getElementById('client-dropdown-name');
@@ -209,6 +212,9 @@ function showDashboard(role) {
       if (clientUsername) clientUsername.textContent = currentUser.name;
       if (clientDropdownName) clientDropdownName.textContent = currentUser.name;
       if (clientDropdownEmail) clientDropdownEmail.textContent = currentUser.email || 'customer@email.com';
+      
+      // Inicializar carrito para cliente
+      initializeCart();
     }
   }
   
@@ -1014,40 +1020,96 @@ async function renderCartTable() {
   if (!currentCart) return;
   
   const items = currentCart.items || [];
-  const tbody = document.getElementById('cart-items-list');
+  
+  // Determinar si usar vendor o client cart elements
+  const isVendor = document.getElementById('vendor-section').style.display !== 'none';
+  const prefix = isVendor ? 'vendor-' : '';
+  
+  const emptyMessage = document.getElementById(`${prefix}empty-cart-message`);
+  const cartContainer = document.getElementById(`${prefix}cart-items-container`);
+  
+  if (items.length === 0) {
+    if (emptyMessage) emptyMessage.style.display = 'block';
+    if (cartContainer) cartContainer.style.display = 'none';
+    return;
+  }
+  
+  if (emptyMessage) emptyMessage.style.display = 'none';
+  if (cartContainer) cartContainer.style.display = 'block';
+  
+  const tbody = document.getElementById(`${prefix}cart-items-list`);
+  if (!tbody) return;
   
   tbody.innerHTML = items.map(item => `
     <tr>
-      <td>${item.product_name}</td>
-      <td>$${item.price}</td>
       <td>
-        <input type="number" value="${item.quantity}" min="1" 
+        <div class="cart-item-info" style="display:flex; align-items:center;">
+          ${item.product_image ? `<img src="${item.product_image}" style="width:50px; height:50px; object-fit:cover; margin-right:10px; border-radius:4px;">` : ''}
+          <span>${item.product_name}</span>
+        </div>
+      </td>
+      <td>$${parseFloat(item.price).toFixed(2)}</td>
+      <td>
+        <input type="number" value="${item.quantity}" min="1" max="${item.product_stock}" 
                onchange="updateQuantity(${item.id}, this.value)" class="qty-input">
       </td>
-      <td>$${(item.price * item.quantity).toFixed(2)}</td>
+      <td>$${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}</td>
       <td>
         <button onclick="removeFromCart(${item.id})" class="btn btn-sm btn-danger">🗑️</button>
       </td>
     </tr>
   `).join('');
   
-  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  document.getElementById('cart-total').textContent = total.toFixed(2);
+  // Calcular totales
+  const subtotal = items.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0);
+  const tax = subtotal * 0; // 0% tax por ahora
+  const total = subtotal + tax;
+  
+  if (document.getElementById(`${prefix}cart-subtotal`)) document.getElementById(`${prefix}cart-subtotal`).textContent = `$${subtotal.toFixed(2)}`;
+  if (document.getElementById(`${prefix}cart-tax`)) document.getElementById(`${prefix}cart-tax`).textContent = `$${tax.toFixed(2)}`;
+  if (document.getElementById(`${prefix}cart-total`)) document.getElementById(`${prefix}cart-total`).textContent = total.toFixed(2);
 }
 
 async function addToCart(productId, productName, price) {
   try {
+    if (!cartId) {
+      showNotification('⚠️ Inicializando carrito...', 'info');
+      await initializeCart();
+      if (!cartId) {
+        throw new Error('No se pudo inicializar el carrito');
+      }
+    }
+    
     const response = await fetch(`${API_URL}/cart/${cartId}/items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product_id: productId, quantity: 1, price })
+      body: JSON.stringify({ 
+        productId: parseInt(productId), 
+        quantity: 1, 
+        price: parseFloat(price) 
+      })
     });
     
     if (response.ok) {
-      socket.emit('add_to_cart', { cartId, productId, quantity: 1, price });
+      showNotification(`✅ ${productName} añadido al carrito`, 'success');
+      await loadCart();
+      
+      // Cambiar a la sección del carrito (detectar si es vendor o client)
+      setTimeout(() => {
+        const isVendor = document.getElementById('vendor-section').style.display !== 'none';
+        if (isVendor) {
+          switchVendorTab('cart');
+        } else {
+          switchClientTab('cart');
+        }
+      }, 500);
+    } else {
+      const error = await response.json();
+      throw new Error(error.error || 'Error desconocido');
     }
   } catch (error) {
-    showNotification('❌ Error añadiendo producto', 'error');
+    console.error('Error añadiendo producto:', error);
+    showNotification(`❌ Error: ${error.message}`, 'error');
   }
 }
 
@@ -1077,12 +1139,53 @@ async function removeFromCart(itemId) {
 async function clearCart() {
   if (confirm('¿Vaciar carrito completamente?')) {
     try {
-      await fetch(`${API_URL}/cart/${cartId}`, { method: 'DELETE' });
-      socket.emit('clear_cart', { cartId });
+      await fetch(`${API_URL}/cart/${cartId}/clear`, { method: 'DELETE' });
+      await loadCart();
+      showNotification('🗑️ Carrito vaciado', 'success');
     } catch (error) {
+      console.error('Error vaciando carrito:', error);
       showNotification('❌ Error vaciando carrito', 'error');
     }
   }
+}
+
+// Compra por WhatsApp
+async function checkoutWhatsApp() {
+  if (!currentCart || !currentCart.items || currentCart.items.length === 0) {
+    showNotification('⚠️ El carrito está vacío', 'warning');
+    return;
+  }
+  
+  const items = currentCart.items || [];
+  const total = items.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0);
+  
+  // Crear mensaje detallado para WhatsApp
+  let mensaje = `*🛒 ORDEN DE COMPRA*\\n\\n`;
+  mensaje += `*Cliente:* ${currentUser.name}\\n`;
+  mensaje += `*Email:* ${currentUser.email}\\n\\n`;
+  mensaje += `*PRODUCTOS:*\\n`;
+  
+  items.forEach((item, index) => {
+    mensaje += `${index + 1}. ${item.product_name}\\n`;
+    mensaje += `   • Cantidad: ${item.quantity}\\n`;
+    mensaje += `   • Precio unitario: $${parseFloat(item.price).toFixed(2)}\\n`;
+    mensaje += `   • Subtotal: $${(parseFloat(item.price) * parseInt(item.quantity)).toFixed(2)}\\n\\n`;
+  });
+  
+  mensaje += `*RESUMEN DE COMPRA:*\\n`;
+  mensaje += `Subtotal: $${items.reduce((sum, item) => sum + (parseFloat(item.price) * parseInt(item.quantity)), 0).toFixed(2)}\\n`;
+  mensaje += `Total: $${total.toFixed(2)}\\n\\n`;
+  mensaje += `Por favor, confirmar disponibilidad y enviar datos de envío.`;
+  
+  // Número de WhatsApp (reemplaza con el número real)
+  const whatsappNumber = '573001234567'; // Formato: 57 (código país) + número
+  const encodedMessage = encodeURIComponent(mensaje);
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+  
+  // Abrir WhatsApp
+  window.open(whatsappUrl, '_blank');
+  
+  showNotification('📱 Abriendo WhatsApp...', 'info');
 }
 
 async function checkout() {
@@ -1127,10 +1230,22 @@ function switchClientTab(tab) {
 // ======================== FUNCIONES AUXILIARES ========================
 async function initializeCart() {
   try {
-    const response = await fetch(`${API_URL}/cart`, { method: 'POST' });
-    const cart = await response.json();
-    cartId = cart.id;
-    currentCart = cart;
+    if (!currentUser || !currentUser.id) {
+      console.error('Usuario no autenticado');
+      return;
+    }
+    
+    const response = await fetch(`${API_URL}/cart/user/${currentUser.id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (response.ok) {
+      const cart = await response.json();
+      cartId = cart.id;
+      currentCart = cart;
+      renderCartTable();
+    }
   } catch (error) {
     console.error('Error inicializando carrito:', error);
   }
@@ -1138,12 +1253,18 @@ async function initializeCart() {
 
 async function loadCart() {
   try {
+    if (!cartId) {
+      console.error('Cart ID no disponible');
+      return;
+    }
+    
     const response = await fetch(`${API_URL}/cart/${cartId}`);
     const cart = await response.json();
     currentCart = cart;
     renderCartTable();
   } catch (error) {
     console.error('Error cargando carrito:', error);
+    showNotification('❌ Error cargando carrito', 'error');
   }
 }
 

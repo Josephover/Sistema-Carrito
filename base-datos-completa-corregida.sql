@@ -66,16 +66,27 @@ CREATE TABLE products (
 );
 
 -- ============================================================
--- TABLA: CARRITO
+-- TABLA: CARRITO (ESTRUCTURA CORRECTA)
 -- ============================================================
 CREATE TABLE carts (
+  id UUID PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  total_price DECIMAL(10, 2) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- TABLA: ITEMS DEL CARRITO (CRÍTICA!)
+-- ============================================================
+CREATE TABLE cart_items (
   id SERIAL PRIMARY KEY,
-  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  cart_id UUID NOT NULL REFERENCES carts(id) ON DELETE CASCADE,
   product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  price DECIMAL(10, 2) NOT NULL CHECK (price > 0),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, product_id)
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================
@@ -111,6 +122,9 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_products_category_id ON products(category_id);
 CREATE INDEX idx_products_seller_id ON products(seller_id);
 CREATE INDEX idx_carts_user_id ON carts(user_id);
+CREATE INDEX idx_carts_created_at ON carts(created_at);
+CREATE INDEX idx_cart_items_cart_id ON cart_items(cart_id);
+CREATE INDEX idx_cart_items_product_id ON cart_items(product_id);
 CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_order_items_order_id ON order_items(order_id);
 
