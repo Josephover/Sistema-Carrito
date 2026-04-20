@@ -603,8 +603,7 @@ MIT
 
 ## 👨‍💻 Autor
 
-Tu nombre aquí
-
+Josephover
 ---
 
 ¡Disfruta construyendo tu carrito en tiempo real! 🚀
